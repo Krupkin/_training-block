@@ -2,10 +2,17 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { ImageLoader, Light, SpriteMaterial } from 'three'
+import * as dat from 'dat.gui'
 
 /**
  * Base
  */
+const gui = new dat.GUI()
+
+
+
+
+
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 
@@ -24,6 +31,7 @@ window.addEventListener('mousemove', (evt) => {
 })
 // FIRST MATERIAL
 const imageLoader = new THREE.TextureLoader()
+const cubeTextureLoader = new THREE.CubeTextureLoader()
 // const texture = imageLoader.load('/textures/door/color.jpg')
 // const alpha = imageLoader.load('/textures/door/alpha.jpg')
 // const height = imageLoader.load('/textures/door/height.jpg')
@@ -31,8 +39,8 @@ const imageLoader = new THREE.TextureLoader()
 // const ambient = imageLoader.load('/textures/door/ambientOcclusion.jpg')
 // const metalness = imageLoader.load('/textures/door/metalness.jpg')
 // const roughness = imageLoader.load('/textures/door/roughness.jpg')
-// const matcap = imageLoader.load('/textures/matcaps/1.png')
-const gradient = imageLoader.load('/textures/gradients/3.jpg')
+// // const matcap = imageLoader.load('/textures/matcaps/1.png')
+// const gradient = imageLoader.load('/textures/gradients/3.jpg')
 
 
 // const material = new THREE.MeshBasicMaterial()
@@ -56,9 +64,58 @@ const gradient = imageLoader.load('/textures/gradients/3.jpg')
 // material.shininess = 1000
 // material.specular = new THREE.Color(0x00ff00)
 
+// SIXTH MATERIAL
+// const material = new THREE.MeshToonMaterial()
+// material.gradientMap = gradient
 
-const material = new THREE.MeshToonMaterial()
-material.gradientMap = gradient
+
+// const material = new THREE.MeshStandardMaterial()
+// material.metalness = 0
+// material.roughness = 0.65
+// material.map = texture
+// material.aoMap = ambient
+// material.aoMapIntensity = 1
+// material.displacementMap = height
+// material.displacementScale = 0.04
+// material.metalnessMap = metalness
+// material.roughness = roughness
+// material.normalMap = normal
+// material.normalScale.set(0.5, 0.5)
+// material.transparent = true
+// material.alphaMap = alpha
+
+scene.background = new THREE.CubeTextureLoader().setPath('/textures/environmentMaps/0/')
+.load([
+    'px.jpg',
+    'nx.jpg',
+    'py.jpg',
+    'ny.jpg',
+    'pz.jpg',
+    'nz.jpg'
+
+])
+
+
+const env = new THREE.CubeTextureLoader().setPath('/textures/environmentMaps/0/')
+.load([
+    'px.jpg',
+    'nx.jpg',
+    'py.jpg',
+    'ny.jpg',
+    'pz.jpg',
+    'nz.jpg'
+
+])
+
+
+const material = new THREE.MeshStandardMaterial()
+
+material.envMap = env
+
+console.log(material.envMap)
+
+gui.add(material, 'metalness').min(0).max(1).step(0.01)
+
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
 const pointLight = new THREE.PointLight(0xffffff, 0.5)
@@ -66,19 +123,24 @@ const pointLight = new THREE.PointLight(0xffffff, 0.5)
 
 
 const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5,16,16),
+    new THREE.SphereBufferGeometry(0.5,64,64),
     material
 )
+sphere.geometry.setAttribute('uv2', new THREE.BufferAttribute(sphere.geometry.attributes.uv.array, 2))
+
 
 const plane = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(),
+    new THREE.PlaneBufferGeometry(1, 1, 100, 100),
     material
 )
+plane.geometry.setAttribute('uv2', new THREE.BufferAttribute(plane.geometry.attributes.uv.array, 2))
+
 
 const tour = new THREE.Mesh(
     new THREE.TorusBufferGeometry(0.4, 0.1, 10, 32),
     material
 )
+tour.geometry.setAttribute('uv2', new THREE.BufferAttribute(tour.geometry.attributes.uv.array, 2))
 
 
 sphere.position.x = 1.2
@@ -155,7 +217,7 @@ const tick = () =>
     tour.rotation.y = 0.15 * elapsedTime;
     plane.rotation.y = 0.15 * elapsedTime;
 
-    pointLight.position.x = Math.sin(mousePosition.x * Math.PI * 2) * 3
+    // pointLight.position.x = Math.sin(mousePosition.x * Math.PI * 2) * 3
     // Update controls
     controls.update()
 
