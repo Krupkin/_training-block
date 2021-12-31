@@ -2,6 +2,8 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
+import { TextGeometry } from 'three'
+
 
 /**
  * Base
@@ -15,20 +17,53 @@ const canvas = document.querySelector('canvas.webgl')
 // Scene
 const scene = new THREE.Scene()
 
+
 /**
  * Textures
- */
+  */
 const textureLoader = new THREE.TextureLoader()
 
 /**
  * Object
  */
-const cube = new THREE.Mesh(
-    new THREE.BoxBufferGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial()
-)
+const axesHelper = new THREE.AxesHelper()
+scene.add(axesHelper)
 
-scene.add(cube)
+const textLoader = new THREE.FontLoader();
+console.log(textLoader)
+textLoader
+    .load(
+        '/fonts/helvetiker_regular.typeface.json' , 
+        ( font ) => {
+	        const geometry = new THREE.TextBufferGeometry( 
+                'Hello three.js!', 
+                {
+		        font: font,
+		        size: 0.2,
+		        height: 0.2,
+		        curveSegments: 12,
+		        bevelEnabled: true,
+		        bevelThickness: 0.03,
+		        bevelSize: 0.03,
+		        bevelOffset: 0,
+		        bevelSegments: 5
+	            } 
+            )
+   geometry.computeBoundingBox()
+    // console.log(-geometry.boundingBox.min.x + geometry.boundingBox.max.x)
+    const textMaterial = new THREE.MeshBasicMaterial()
+    const text = new THREE.Mesh(geometry, textMaterial)
+    scene.add(text)
+    console.log(text.width)
+    text.position.x = -(-geometry.boundingBox.min.x + geometry.boundingBox.max.x)/2
+
+
+} );
+
+
+
+
+
 
 /**
  * Sizes
@@ -37,6 +72,8 @@ const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 }
+
+
 
 window.addEventListener('resize', () =>
 {
