@@ -22,6 +22,8 @@ const scene = new THREE.Scene()
  * Textures
   */
 const textureLoader = new THREE.TextureLoader()
+const matCapTexture = textureLoader.load('/textures/matcaps/1.png')
+console.log(matCapTexture)
 
 /**
  * Object
@@ -30,7 +32,7 @@ const axesHelper = new THREE.AxesHelper()
 scene.add(axesHelper)
 
 const textLoader = new THREE.FontLoader();
-console.log(textLoader)
+
 textLoader
     .load(
         '/fonts/helvetiker_regular.typeface.json' , 
@@ -39,28 +41,43 @@ textLoader
                 'Hello three.js!', 
                 {
 		        font: font,
-		        size: 0.2,
-		        height: 0.2,
-		        curveSegments: 12,
+		        size: 0.3,
+		        height: 0.1,
+		        curveSegments: 5,
 		        bevelEnabled: true,
 		        bevelThickness: 0.03,
-		        bevelSize: 0.03,
+		        bevelSize: 0.02,
 		        bevelOffset: 0,
-		        bevelSegments: 5
+		        bevelSegments: 4
 	            } 
             )
    geometry.computeBoundingBox()
     // console.log(-geometry.boundingBox.min.x + geometry.boundingBox.max.x)
-    const textMaterial = new THREE.MeshBasicMaterial()
+    const textMaterial = new THREE.MeshMatcapMaterial({matcap: matCapTexture})
     const text = new THREE.Mesh(geometry, textMaterial)
     scene.add(text)
-    console.log(text.width)
-    text.position.x = -(-geometry.boundingBox.min.x + geometry.boundingBox.max.x)/2
-
-
+    // text.position.x = -(-geometry.boundingBox.min.x + geometry.boundingBox.max.x)/2
+    geometry.center()
 } );
 
 
+for(let i = 0; i < 100; i++ ){
+    const tourGeom = new THREE.TorusBufferGeometry(0.2, 0.1, 20, 45)
+    const tourMat = new THREE.MeshMatcapMaterial({matcap: matCapTexture})
+    const tour = new THREE.Mesh(tourGeom, tourMat)
+
+
+    tour.position.x = (Math.random()  - 0.5)* 5
+    tour.position.y = (Math.random()  - 0.5)* 5
+    tour.position.z = (Math.random()  - 0.5)* 5
+
+    tour.rotation.x = Math.random() * Math.PI
+    tour.rotation.y = Math.random() * Math.PI
+
+    const scale = Math.random()
+    tour.scale.set(scale, scale, scale)
+    scene.add(tour)
+}   
 
 
 
