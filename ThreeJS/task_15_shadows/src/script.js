@@ -2,6 +2,7 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
+import { SphereBufferGeometry } from 'three'
 
 /**
  * Base
@@ -30,7 +31,40 @@ gui.add(directionalLight, 'intensity').min(0).max(1).step(0.001)
 gui.add(directionalLight.position, 'x').min(- 5).max(5).step(0.001)
 gui.add(directionalLight.position, 'y').min(- 5).max(5).step(0.001)
 gui.add(directionalLight.position, 'z').min(- 5).max(5).step(0.001)
+
+directionalLight.castShadow = true
+directionalLight.shadow.mapSize.width = 1024;
+directionalLight.shadow.mapSize.height = 1024;
+directionalLight.shadow.camera.top = 2;
+directionalLight.shadow.camera.right = 2;
+directionalLight.shadow.camera.bottom = -2;
+directionalLight.shadow.camera.left = -2;
+directionalLight.shadow.camera.near = 1;
+directionalLight.shadow.camera.far = 6;
+
+directionalLight.shadow.radius = 10;
 scene.add(directionalLight)
+
+
+const spotLight = new THREE.SpotLight( 0xffffff, 0.4, 10, Math.PI * 0.3 );
+spotLight.position.set( 1, 1, 1 );
+
+spotLight.castShadow = true;
+
+spotLight.shadow.mapSize.width = 1024;
+spotLight.shadow.mapSize.height = 1024;
+scene.add( spotLight );
+
+
+
+const pointLight = new THREE.PointLight(0xff00ff, 0.3)
+pointLight.position.set( -2, 2, 2 );
+
+pointLight.castShadow = true;
+pointLight.shadow.mapSize.width = 1024;
+pointLight.shadow.mapSize.height = 1024;
+scene.add( pointLight );
+
 
 /**
  * Materials
@@ -48,12 +82,17 @@ const sphere = new THREE.Mesh(
     material
 )
 
+sphere.castShadow = true
+
+
 const plane = new THREE.Mesh(
     new THREE.PlaneBufferGeometry(5, 5),
     material
 )
 plane.rotation.x = - Math.PI * 0.5
 plane.position.y = - 0.5
+
+plane.receiveShadow = true
 
 scene.add(sphere, plane)
 
@@ -90,6 +129,15 @@ camera.position.y = 1
 camera.position.z = 2
 scene.add(camera)
 
+const directCameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
+scene.add(directCameraHelper)
+const spotCameraHelper = new THREE.CameraHelper(spotLight.shadow.camera)
+scene.add(spotCameraHelper)
+const pointCameraHelper = new THREE.CameraHelper(pointLight.shadow.camera)
+scene.add(pointCameraHelper)
+
+
+
 // Controls
 const controls = new OrbitControls(camera, canvas)
 controls.enableDamping = true
@@ -102,6 +150,9 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+
+renderer.shadowMap.enabled = true
 
 /**
  * Animate
