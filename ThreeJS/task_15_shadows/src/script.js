@@ -4,6 +4,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
 import { SphereBufferGeometry } from 'three'
 
+
+
+
+const textureLoader = new THREE.TextureLoader()
+const backedShadow = textureLoader.load('/textures/bakedShadow.jpg')
+const simpleShadow = textureLoader.load('/textures/simpleShadow.jpg')
 /**
  * Base
  */
@@ -96,6 +102,20 @@ plane.receiveShadow = true
 
 scene.add(sphere, plane)
 
+
+const sphareShadow = new THREE.Mesh(
+    new THREE.PlaneBufferGeometry(1.5, 1.5),
+    new THREE.MeshBasicMaterial({
+        color: 0xff00ff,
+        transparent: true,
+        alphaMap: simpleShadow 
+        
+    })
+)
+sphareShadow.rotation.x = - Math.PI * 0.5
+sphareShadow.position.y = plane.position.y + 0.01
+scene.add(sphareShadow)
+
 /**
  * Sizes
  */
@@ -129,12 +149,12 @@ camera.position.y = 1
 camera.position.z = 2
 scene.add(camera)
 
-const directCameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
-scene.add(directCameraHelper)
-const spotCameraHelper = new THREE.CameraHelper(spotLight.shadow.camera)
-scene.add(spotCameraHelper)
-const pointCameraHelper = new THREE.CameraHelper(pointLight.shadow.camera)
-scene.add(pointCameraHelper)
+// const directCameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
+// scene.add(directCameraHelper)
+// const spotCameraHelper = new THREE.CameraHelper(spotLight.shadow.camera)
+// scene.add(spotCameraHelper)
+// const pointCameraHelper = new THREE.CameraHelper(pointLight.shadow.camera)
+// scene.add(pointCameraHelper)
 
 
 
@@ -152,7 +172,7 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
 
-renderer.shadowMap.enabled = true
+renderer.shadowMap.enabled = false
 
 /**
  * Animate
@@ -163,6 +183,14 @@ const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
 
+    sphere.position.x = Math.cos(elapsedTime) * 1.5
+    sphere.position.z = Math.sin(elapsedTime) * 1.5
+    sphere.position.y = Math.abs(Math.sin(elapsedTime * 3))
+
+
+    sphareShadow.position.x = sphere.position.x
+    sphareShadow.position.z = sphere.position.z
+    sphareShadow.material.opacity = 1-sphere.position.y* 0.9
     // Update controls
     controls.update()
 
