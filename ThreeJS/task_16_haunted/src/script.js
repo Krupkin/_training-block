@@ -160,6 +160,8 @@ for(let i = 0; i < 70; i++){
     )
     graveGeometry.position.set(x, 0.3, z)
     graveGeometry.rotation.y = (Math.random() - 0.5) * 0.4
+    graveGeometry.castShadow = true
+    graveGeometry.receiveShadow = true
     scene.add(graveGeometry)
 }
 
@@ -207,6 +209,14 @@ const doorsLight = new THREE.PointLight('#edd609', 1, 7)
 const doorsLightHelper = new THREE.PointLightHelper(doorsLight)
 doorsLight.position.set(0, 2, 2)
 house.add(doorsLight, doorsLightHelper)
+
+const ghostOne = new THREE.PointLight('#ed09d6', 1, 7)
+const ghostOneHelper = new THREE.PointLightHelper(ghostOne)
+scene.add(ghostOne, ghostOneHelper)
+
+const ghostTwo = new THREE.PointLight('#d5f507', 1, 7)
+const ghostTwoHelper = new THREE.PointLightHelper(ghostTwo )
+scene.add(ghostTwo , ghostTwoHelper)
 
 
 // FOG
@@ -260,7 +270,27 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.setClearColor('#1d5234')
+renderer.shadowMap.enabled = true
 
+
+
+moonLight.castShadow = true
+doorsLight.castShadow = true
+doorsLight.shadow.mapSize.width = 256
+doorsLight.shadow.mapSize.height = 256
+doorsLight.shadow.camera.far = 7
+ghostOne.castShadow = true
+ghostTwo.castShadow = true
+
+walls.castShadow = true
+roof.castShadow = true
+bushOne.castShadow = true
+bushTwo.castShadow = true
+bushThree.castShadow = true
+bushFour.castShadow = true
+
+floor.receiveShadow = true
+walls.receiveShadow = true
 /**
  * Animate
  */
@@ -269,6 +299,16 @@ const clock = new THREE.Clock()
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    const ghostAgile = elapsedTime * 0.5
+    ghostOne.position.x = Math.cos(ghostAgile) * 4
+    ghostOne.position.z = Math.sin(ghostAgile) * 4
+    ghostOne.position.y = Math.sin(elapsedTime * 3)
+
+    ghostTwo.position.x = Math.cos(-ghostAgile) * 4
+    ghostTwo.position.z = Math.sin(-ghostAgile) * 4
+    ghostTwo.position.y = Math.sin(-elapsedTime * 3)
+
+
 
     // Update controls
     controls.update() 
