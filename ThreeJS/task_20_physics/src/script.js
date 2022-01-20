@@ -2,11 +2,54 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
+import CANNON from 'cannon'
+
 
 /**
  * Debug
  */
 const gui = new dat.GUI()
+
+
+
+const world = new CANNON.World()
+world.gravity.set(0, -9.82, 0)
+
+
+const defaultMaterial = new CANNON.Material('default')
+
+
+const defaultContactMaterial = new CANNON.ContactMaterial(
+    defaultMaterial,
+    defaultMaterial,
+    {
+        friction: 0.1, 
+        restitution: 0.5
+    }
+)
+
+world.addContactMaterial(defaultContactMaterial)
+world.defaultContactMaterial = defaultContactMaterial
+
+const sphereShape = new CANNON.Sphere(0.5)
+const sphereBody = new CANNON.Body({
+    mass: 1,
+    position: new CANNON.Vec3(0, 3, 0),
+    shape:sphereShape,
+})
+
+sphereBody.applyLocalForce(new CANNON.Vec3(159, 0, 0), new CANNON.Vec3(0,0,0))
+
+world.add(sphereBody)
+
+const floorShape = new CANNON.Plane()
+const floorBody = new CANNON.Body({
+    mass: 0
+})
+
+floorBody.addShape(floorShape)
+floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1,0,0), Math.PI * 0.5)
+world.addBody(floorBody)
 
 /**
  * Base
@@ -126,15 +169,36 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
+
+const createSohere = (radius, positibn) => {
+    const mesh = new THREE.Mesh(
+        new THREE.SphereBufferGeometry(radius, 20, 20),
+        new THREE.MeshStandardMaterial({
+            metalness: 0.3,
+            roughness: 0.4,
+            envMap: environmentMapTexture
+        })
+    )
+    mesh.castShadow = true
+    mesh.getWorldPosition.copy(positibn)
+    scene.add(mesh)
+}
+
 /**
  * Animate
  */
 const clock = new THREE.Clock()
-
+let oldElapsedTime = 0
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
+    const deltaTime = elapsedTime - oldElapsedTime
+    oldElapsedTime = elapsedTime
 
+    sphereBody.applyForce(new CANNON.Vec3(- 0.5, 0, 0), sphereBody.position)
+    world.step(1/60, deltaTime, 3)
+
+    sphere.position.copy(sphereBody.position)
     // Update controls
     controls.update()
 
